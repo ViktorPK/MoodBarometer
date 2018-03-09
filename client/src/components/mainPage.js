@@ -2,6 +2,8 @@ import React from 'react';
 import Reflux from 'reflux';
 import MainStore from '../stores/mainStore';
 import actions from '../actions/actions';
+import socketIOClient from "socket.io-client";
+const socket = socketIOClient('http://localhost:3001');
 
 class MainPage extends Reflux.Component {
   constructor(props) {
@@ -9,7 +11,11 @@ class MainPage extends Reflux.Component {
     this.state = { };
     this.stores = [MainStore];
   }
-
+  componentDidMount(){
+    socket.on('tweet', function (data) {
+    actions.gotTweet(data);
+});
+  }
   render() {
 
     return (

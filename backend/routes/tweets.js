@@ -10,8 +10,10 @@ var nCount=0;
 var overallSentiment=0;
 var count=0;
 var averageSentiment=0;
+var io;
 
-db.getWeek(currentWeekNumber(), function(err,doc){    // Recover values from database in the event of a server crash
+db.getWeek(currentWeekNumber(), function(err,doc){// Recover values from database in the event of a server crash
+ io=require('../bin/www');
   if (doc){
     console.log("backup found!")
     pCount=doc.positive;
@@ -41,6 +43,7 @@ var natural_language_understanding = new NaturalLanguageUnderstandingV1({
 var parameters = config.watson.parameters;
 
 client.stream('statuses/filter', {track: '#mood', language:'en'}, function(stream) {  //stream english tweets featuring #mood
+  console.log(io);
   stream.on('data', function(event) {
     if (event.extended_tweet) parameters.text=event.extended_tweet.full_text;       //if tweet is shortened get full tweet
     else parameters.text = event.text;
@@ -61,6 +64,7 @@ client.stream('statuses/filter', {track: '#mood', language:'en'}, function(strea
     console.log('Overall: ' + overallSentiment + ' Count: ' + count + ' Average: ' + averageSentiment);
     console.log(parameters.text)
     console.log('---------------------------------------------\n')
+    io.emit('tweet',count); //IOIOIOIO
     db.update(currentWeekNumber(),pCount, nCount, cCount, count, averageSentiment)  //update db after each tweet
   }
 });
@@ -70,8 +74,9 @@ client.stream('statuses/filter', {track: '#mood', language:'en'}, function(strea
   });
 });
 
-function giveCount(req,res) {                   //Redirect to Front-End when Sockets are implemented
+function giveCount(req,res) {         //Redirect to Front-End when Sockets are implemented
   res.json({ count: cCount+nCount+pCount});
+
 }
 
 router.get('/', giveCount);
