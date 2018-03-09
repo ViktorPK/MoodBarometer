@@ -1,53 +1,71 @@
 var express = require('express');
 var router = express.Router();
 var Twitter = require('twitter');
+const config = require('../config');
+var currentWeekNumber = require('current-week-number');
+var db = require('../db');
 var pCount=0;
 var cCount=0;
-var nCount=0;                     //mby get it from database to recover after server downtime?
+var nCount=0;
 var overallSentiment=0;
-var client = new Twitter({
-  consumer_key: 'mEaGMQ2EfIfRvf2uYm5AgKcHP',
-  consumer_secret: 'H59VKkwGsdxpLevayJgQYbzHufC2REvwtvovQn74WpPLpZVGcS',
-  access_token_key: '930139087645958144-UyJUTUIxksGXfY2vfskntM5wgUTcbZW',
-  access_token_secret: 'pnOFUExNAB0T4ggzzTcmOaYPBukbbJ5WkdOxT9ufj15Uz'
-});
+var count=0;
+var averageSentiment=0;
 
-var NaturalLanguageUnderstandingV1 = require('watson-developer-cloud/natural-language-understanding/v1.js');
-var natural_language_understanding = new NaturalLanguageUnderstandingV1({
-  'username': '41f07a8b-5576-4ce3-a378-ef23aa55dcb2',
-  'password': '0vBD65lqdJQM',
-  'version_date': '2017-02-27'
-});
-
-var parameters = {
-  'text': '',
-  'features': {
-    'sentiment':{}
+db.getWeek(currentWeekNumber(), function(err,doc){    // Recover values from database in the event of a server crash
+  if (doc){
+    console.log("backup found!")
+    pCount=doc.positive;
+    cCount=doc.neutral;
+    nCount=doc.negative;
+    overallSentiment=doc.averageSentiment*doc.count;
+    count=doc.count;
+    averageSentiment=doc.averageSentiment;
   }
-}
+});
+
+//Get credentials from config file
+var client = new Twitter({        //Twitter API connection
+  consumer_key: config.twitter.consumer_key,
+  consumer_secret: config.twitter.consumer_secret,
+  access_token_key: config.twitter.access_token_key,
+  access_token_secret: config.twitter.access_token_secret
+});
+
+var NaturalLanguageUnderstandingV1 = require('watson-developer-cloud/natural-language-understanding/v1.js');      //IBM Watson connection
+var natural_language_understanding = new NaturalLanguageUnderstandingV1({
+  'username': config.watson.username,
+  'password': config.watson.password,
+  'version_date': config.watson.version_date
+});
+
+var parameters = config.watson.parameters;
 
 client.stream('statuses/filter', {track: '#mood', language:'en'}, function(stream) {  //stream english tweets featuring #mood
   stream.on('data', function(event) {
-    if (event.extended_tweet) parameters.text=event.extended_tweet.full_text;
+    if (event.extended_tweet) parameters.text=event.extended_tweet.full_text;       //if tweet is shortened get full tweet
     else parameters.text = event.text;
     natural_language_understanding.analyze(parameters, function(err, response) {
   if (err)
     console.log('error:', err);
-  else
+  else if (response.sentiment != null) {
     if(event.retweeted_status) overallSentiment+=response.sentiment.document.score/2  //weighted scoring for Retweets - retweets are less valuable than original tweets
-    overallSentiment+=response.sentiment.document.score;                              //calculate statistics
+    else overallSentiment+=response.sentiment.document.score;                              //calculate statistics
     if (response.sentiment.document.label=='positive') pCount++;
     else if (response.sentiment.document.label=='negative') nCount++;
     else cCount++;
+
     //print info to console
+    count=nCount+pCount+cCount;
+    averageSentiment=overallSentiment/count;
     console.log(response.sentiment.document.score + '  ' +response.sentiment.document.label)
-    console.log('Overall: ' + overallSentiment + ' Count: ' + (nCount+pCount+cCount) + ' Average: ' + overallSentiment/(nCount+pCount+cCount));
+    console.log('Overall: ' + overallSentiment + ' Count: ' + count + ' Average: ' + averageSentiment);
     console.log(parameters.text)
     console.log('---------------------------------------------\n')
-
+    db.update(currentWeekNumber(),pCount, nCount, cCount, count, averageSentiment)  //update db after each tweet
+  }
 });
   });
-  stream.on('error', function(error) {
+  stream.on('error', function(error) {  //TODO reconnect on error?
     throw error;
   });
 });
