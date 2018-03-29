@@ -43,13 +43,12 @@ var natural_language_understanding = new NaturalLanguageUnderstandingV1({
 var parameters = config.watson.parameters;
 
 client.stream('statuses/filter', {track: '#mood', language:'en'}, function(stream) {  //stream english tweets featuring #mood
-  console.log(io);
   stream.on('data', function(event) {
     if (event.extended_tweet) parameters.text=event.extended_tweet.full_text;       //if tweet is shortened get full tweet
     else parameters.text = event.text;
     natural_language_understanding.analyze(parameters, function(err, response) {
   if (err)
-    console.log('error:', err);
+    console.log('Analyze API error:', err);
   else if (response.sentiment != null) {
     if(event.retweeted_status) overallSentiment+=response.sentiment.document.score/2  //weighted scoring for Retweets - retweets are less valuable than original tweets
     else overallSentiment+=response.sentiment.document.score;                              //calculate statistics
@@ -64,7 +63,7 @@ client.stream('statuses/filter', {track: '#mood', language:'en'}, function(strea
     console.log('Overall: ' + overallSentiment + ' Count: ' + count + ' Average: ' + averageSentiment);
     console.log(parameters.text)
     console.log('---------------------------------------------\n')
-    io.emit('tweet',count); //IOIOIOIO
+    io.emit('tweet',{count: count, positive:pCount, negative:nCount, neutral:cCount}); //IOIOIOIO
     db.update(currentWeekNumber(),pCount, nCount, cCount, count, averageSentiment)  //update db after each tweet
   }
 });

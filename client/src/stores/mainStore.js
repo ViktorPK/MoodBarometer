@@ -1,21 +1,27 @@
 import Reflux from 'reflux';
 import request from 'superagent';
 import actions from '../actions/actions';
-import socketIOClient from "socket.io-client";
 const prefix = require('superagent-prefix')('http://localhost:3001')
-const socket = socketIOClient('http://localhost:3001');
 
 class MainStore extends Reflux.Store {
   constructor() {
     super();
     this.state = {
       count: 0,
+      positive:0,
+      negative:0,
+      neutral:0
     };
     this.listenables = actions;
   }
 
   gotTweet(data){
-    this.setState({count:data});
+    this.setState({
+      count:data.count,
+      positive:data.positive,
+      negative:data.negative,
+      neutral:data.neutral
+    });
   }
 
   getTweetsCompleted(res) {
