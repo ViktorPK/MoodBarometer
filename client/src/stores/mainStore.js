@@ -10,7 +10,12 @@ class MainStore extends Reflux.Store {
       count: 0,
       positive:0,
       negative:0,
-      neutral:0
+      neutral:0,
+      nSent:0,
+      pSent:0,
+      pPercent:0,
+      nPercent:0,
+      cPercent:0,
     };
     this.listenables = actions;
   }
@@ -20,7 +25,12 @@ class MainStore extends Reflux.Store {
       count:data.count,
       positive:data.positive,
       negative:data.negative,
-      neutral:data.neutral
+      neutral:data.neutral,
+      pSent:data.pSent.toFixed(10),
+      nSent:data.nSent.toFixed(10),
+      pPercent:((data.positive/data.count)*100).toFixed(0),
+      nPercent:((data.negative/data.count)*100).toFixed(0),
+      cPercent:100-((data.positive/data.count)*100).toFixed(0)-((data.negative/data.count)*100).toFixed(0)
     });
   }
 

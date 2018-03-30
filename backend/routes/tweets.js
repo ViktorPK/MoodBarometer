@@ -7,6 +7,8 @@ var db = require('../db');
 var pCount=0;
 var cCount=0;
 var nCount=0;
+var pSent=0;
+var nSent=0;
 var overallSentiment=0;
 var count=0;
 var averageSentiment=0;
@@ -19,6 +21,8 @@ db.getWeek(currentWeekNumber(), function(err,doc){// Recover values from databas
     pCount=doc.positive;
     cCount=doc.neutral;
     nCount=doc.negative;
+    pSent=doc.pSentiment;
+    nSent=doc.nSentiment;
     overallSentiment=doc.averageSentiment*doc.count;
     count=doc.count;
     averageSentiment=doc.averageSentiment;
@@ -52,9 +56,17 @@ client.stream('statuses/filter', {track: '#mood', language:'en'}, function(strea
   else if (response.sentiment != null) {
     if(event.retweeted_status) overallSentiment+=response.sentiment.document.score/2  //weighted scoring for Retweets - retweets are less valuable than original tweets
     else overallSentiment+=response.sentiment.document.score;                              //calculate statistics
-    if (response.sentiment.document.label=='positive') pCount++;
-    else if (response.sentiment.document.label=='negative') nCount++;
-    else cCount++;
+    if (response.sentiment.document.label=='positive') {
+      pCount++;
+      pSent+=response.sentiment.document.score;
+    }
+    else if (response.sentiment.document.label=='negative') {
+      nCount++;
+      nSent+=response.sentiment.document.score;
+    }
+    else {
+      cCount++;
+    }
 
     //print info to console
     count=nCount+pCount+cCount;
@@ -63,8 +75,8 @@ client.stream('statuses/filter', {track: '#mood', language:'en'}, function(strea
     console.log('Overall: ' + overallSentiment + ' Count: ' + count + ' Average: ' + averageSentiment);
     console.log(parameters.text)
     console.log('---------------------------------------------\n')
-    io.emit('tweet',{count: count, positive:pCount, negative:nCount, neutral:cCount}); //IOIOIOIO
-    db.update(currentWeekNumber(),pCount, nCount, cCount, count, averageSentiment)  //update db after each tweet
+    io.emit('tweet',{count: count, positive:pCount, pSent:(pSent/pCount), negative:nCount, nSent:(nSent/nCount), neutral:cCount}); //IOIOIOIO
+    db.update(currentWeekNumber(),pCount, pSent, nCount, nSent, cCount, count, averageSentiment)  //update db after each tweet
   }
 });
   });
@@ -73,7 +85,7 @@ client.stream('statuses/filter', {track: '#mood', language:'en'}, function(strea
   });
 });
 
-function giveCount(req,res) {         //Redirect to Front-End when Sockets are implemented
+function giveCount(req,res) {               //TODO redirect to main page
   res.json({ count: cCount+nCount+pCount});
 
 }
