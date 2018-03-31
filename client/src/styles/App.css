@@ -1,5 +1,7 @@
 .App {
   text-align: center;
+  background: rgb(48, 48, 48) !important;
+  color: #ffffff !important;
 }
 
 .App-logo {
@@ -22,7 +24,7 @@
   font-size: large;
 }
 
-.rowC{display:flex; flex-direction:row;padding-bottom: 5px;padding-top: 5px}
+.rowC{display:flex; flex-direction:row;padding-bottom: 5px;padding-top: 5px;background-color: #fcf5f4}
 .paper{width:100%}
 .rdiv{width:100%}
 .headings{ padding: 10px; text-align: center; font-size: large;}
@@ -31,6 +33,10 @@
 .first{padding-left:15%}
 .analysis{padding:10px; padding-top: 0px}
 .divi{padding-top:30px}
+.tHeader{color:#d17a22 !important;
+font-weight: bold !important;
+font-size: 14px !important;}
+
 
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }

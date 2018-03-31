@@ -44,12 +44,12 @@ class MainPage extends Reflux.Component {
 
     return (
       <MuiThemeProvider muiTheme={getMuiTheme(darkBaseTheme)}>
-
       <AppBar className="App"
       title="Mood Barometer"
+      titleStyle={{color: "#fffffff"}}
       iconElementRight={
         <IconButton tooltip="Information">
-       <FontIcon className="material-icons">info_outline</FontIcon>
+       <FontIcon className="material-icons" color='#ffffff'>info_outline</FontIcon>
        </IconButton>
       }
       showMenuIconButton={false}
@@ -59,30 +59,31 @@ class MainPage extends Reflux.Component {
       <div>
  <VictoryPie
  animate={{duration: 500}}
+colorScale={["#70161e", "#596f62", "#d17a22" ]}
  padding={{top: 20, bottom: 10 }}
- height={300}
+ height={290}
  innerRadius={50}
  style={{ labels: { fill: "white", fontSize: 0 } }}
 data={[
-{ x: "", y: this.state.positive },
+{ x: "", y: this.state.negative },
 { x: "", y: this.state.neutral },
-{ x: "", y: this.state.negative }
+{ x: "", y: this.state.positive }
 ]}
 />
 </div>
 <div className='rowC'>
 <div className='first'/>
-<Chip backgroundColor={blue300}
+<Chip backgroundColor='#d17a22'
 >
 Positive
 </Chip>
 <div className='between'/>
-<Chip backgroundColor={blue300}
+<Chip backgroundColor='#70161e'
 >
 Negative
 </Chip>
 <div className='between'/>
-<Chip backgroundColor={blue300}
+<Chip backgroundColor='#596f62'
 >
 Neutral
 </Chip>
@@ -102,10 +103,10 @@ Tweets: {this.state.count}
 <TableHeader adjustForCheckbox={false}
 displaySelectAll={false}>
     <TableRow>
-      <TableHeaderColumn>Type</TableHeaderColumn>
-      <TableHeaderColumn>Count</TableHeaderColumn>
-      <TableHeaderColumn>Percentage</TableHeaderColumn>S
-      <TableHeaderColumn>Average Sentiment</TableHeaderColumn>
+      <TableHeaderColumn className="tHeader">Type</TableHeaderColumn>
+      <TableHeaderColumn className="tHeader">Count</TableHeaderColumn>
+      <TableHeaderColumn className="tHeader">Percentage</TableHeaderColumn>S
+      <TableHeaderColumn className="tHeader">Average Sentiment</TableHeaderColumn>
     </TableRow>
   </TableHeader>
   <TableBody displayRowCheckbox={false}>
@@ -143,12 +144,12 @@ Lorem ipsum dolor sit amet, volumus molestie tincidunt at his. Ea possit tamquam
     <BottomNavigationItem
       label="Real-Time"
       icon={recentsIcon}
-      onClick={() => this.select(0)}
+      // onClick={() => this.select(0)}
     />
     <BottomNavigationItem
       label="Timeline"
       icon={favoritesIcon}
-      onClick={() => this.select(1)}
+      // onClick={() => this.select(1)}
     />
   </BottomNavigation>
       </MuiThemeProvider>
