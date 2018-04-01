@@ -14,8 +14,8 @@ import {BottomNavigation, BottomNavigationItem} from 'material-ui/BottomNavigati
 import Paper from 'material-ui/Paper';
 import FontIcon from 'material-ui/FontIcon';
 import Chip from 'material-ui/Chip'
-import {blue300} from 'material-ui/styles/colors';
 import {VictoryPie} from 'victory';
+import { Redirect } from 'react-router-dom';
 import {
   Table,
   TableBody,
@@ -26,8 +26,9 @@ import {
 } from 'material-ui/Table';
 
 const socket = socketIOClient('http://localhost:3001');
-const recentsIcon = <FontIcon className="material-icons">pie_chart</FontIcon>;
-const favoritesIcon = <FontIcon className="material-icons">timeline</FontIcon>;
+const realtime = <FontIcon style={{color: '#d17a22'}} className="material-icons">pie_chart</FontIcon>;
+const timeline = <FontIcon className="material-icons">timeline</FontIcon>;
+const tweets = <FontIcon className="material-icons">view_stream</FontIcon>;
 
 class MainPage extends Reflux.Component {
   constructor(props) {
@@ -71,18 +72,15 @@ data={[
 ]}
 />
 </div>
-<div className='rowC'>
-<div className='first'/>
+<div className='rowChips'>
 <Chip backgroundColor='#d17a22'
 >
 Positive
 </Chip>
-<div className='between'/>
 <Chip backgroundColor='#70161e'
 >
 Negative
 </Chip>
-<div className='between'/>
 <Chip backgroundColor='#596f62'
 >
 Neutral
@@ -140,18 +138,23 @@ Lorem ipsum dolor sit amet, volumus molestie tincidunt at his. Ea possit tamquam
 </Paper>
 </div>
 
-  <BottomNavigation selectedIndex={this.state.selectedIndex}>
-    <BottomNavigationItem
-      label="Real-Time"
-      icon={recentsIcon}
-      // onClick={() => this.select(0)}
-    />
-    <BottomNavigationItem
-      label="Timeline"
-      icon={favoritesIcon}
-      // onClick={() => this.select(1)}
-    />
-  </BottomNavigation>
+  <BottomNavigation>
+  <BottomNavigationItem
+    label="Real-Time"
+    icon={realtime}
+    onClick={({ title, history }) => this.props.history.push('/')}
+  />
+  <BottomNavigationItem
+    label="Timeline"
+    icon={timeline}
+      onClick={({ title, history }) => this.props.history.push('/statistics')}
+  />
+  <BottomNavigationItem
+    label="Tweets"
+    icon={tweets}
+    onClick={({ title, history }) => this.props.history.push('/tweets')}
+  />
+</BottomNavigation>
       </MuiThemeProvider>
     );
   }

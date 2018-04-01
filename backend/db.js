@@ -2,7 +2,7 @@ const config = require('./config');
     var MongoClient = require('mongodb').MongoClient;
     var url = config.db;
 
-     exports.update = function(week,pCount, pSent, nCount, nSent, cCount, cSent, count, averageSentiment, callback)
+     exports.update = function(week,pCount, pSent, nCount, nSent, cCount, count, averageSentiment, callback)
      {
       MongoClient.connect(url, function(err, db) {
          if(err) throw err;
@@ -26,11 +26,36 @@ exports.getWeek = function(week, callback){
     if(err)
     {
        callback(err);
+         db.close();
     }
     else
     {
        callback(null, doc);
+         db.close();
     }
   });
 });
+}
+
+exports.getAll = function(){
+  var ret = [];
+  MongoClient.connect(url, function(err, db) {
+     if(err) throw err;
+     const moodBarDB = db.db('moodBar')
+     var collection =  moodBarDB.collection('weeks')
+
+     collection.find({}).project({_id:0, positive:0, pSentiment:0, negative: 0, nSentiment: 0, neutral: 0}).toArray(function(err, result) {
+       if (err) {
+           console.log(err);
+             db.close();
+       } else if (result.length > 0) {
+         for (i=result.length-1;i>=0;i--){
+           ret.push(Object.values(result[i]));
+             db.close();
+         }
+       }
+   });
+});
+
+return ret;
 }

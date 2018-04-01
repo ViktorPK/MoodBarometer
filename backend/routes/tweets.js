@@ -46,7 +46,7 @@ var natural_language_understanding = new NaturalLanguageUnderstandingV1({
 
 var parameters = config.watson.parameters;
 
-client.stream('statuses/filter', {track: '#mood', language:'en'}, function(stream) {  //stream english tweets featuring #mood
+client.stream('statuses/filter', {track: '#love', language:'en'}, function(stream) {  //stream english tweets featuring #mood
   stream.on('data', function(event) {
     if (event.extended_tweet) parameters.text=event.extended_tweet.full_text;       //if tweet is shortened get full tweet
     else parameters.text = event.text;
@@ -54,15 +54,19 @@ client.stream('statuses/filter', {track: '#mood', language:'en'}, function(strea
   if (err)
     console.log('Analyze API error:', err);
   else if (response.sentiment != null) {
-    if(event.retweeted_status) overallSentiment+=response.sentiment.document.score/2  //weighted scoring for Retweets - retweets are less valuable than original tweets
-    else overallSentiment+=response.sentiment.document.score;                              //calculate statistics
+    var sentScore=response.sentiment.document.score;
+    if(event.retweeted_status) {  //weighted scoring for Retweets - retweets are less valuable than original tweets
+      sentScore=sentScore/2;
+      overallSentiment+=sentScore;
+    }
+    else overallSentiment+=sentScore;                              //calculate statistics
     if (response.sentiment.document.label=='positive') {
       pCount++;
-      pSent+=response.sentiment.document.score;
+      pSent+=sentScore;
     }
     else if (response.sentiment.document.label=='negative') {
       nCount++;
-      nSent+=response.sentiment.document.score;
+      nSent+=sentScore;
     }
     else {
       cCount++;
@@ -75,8 +79,14 @@ client.stream('statuses/filter', {track: '#mood', language:'en'}, function(strea
     console.log('Overall: ' + overallSentiment + ' Count: ' + count + ' Average: ' + averageSentiment);
     console.log(parameters.text)
     console.log('---------------------------------------------\n')
-    io.emit('tweet',{count: count, positive:pCount, pSent:(pSent/pCount), negative:nCount, nSent:(nSent/nCount), neutral:cCount}); //IOIOIOIO
+    if (pCount==0 && nCount==0) io.emit('tweet',{count: count, positive:pCount, pSent:0, negative:nCount, nSent: 0, neutral:cCount}); //thats ugly.
+    if (nCount==0) io.emit('tweet',{count: count, positive:pCount, pSent:(pSent/pCount), negative:nCount, nSent: 0, neutral:cCount});
+    else if (pCount==0) io.emit('tweet',{count: count, positive:pCount, pSent: 0, negative:nCount, nSent:(nSent/nCount), neutral:cCount});
+    else {
+    io.emit('tweet',{count: count, positive:pCount, pSent:(pSent/pCount), negative:nCount, nSent:(nSent/nCount), neutral:cCount}); 
     db.update(currentWeekNumber(),pCount, pSent, nCount, nSent, cCount, count, averageSentiment)  //update db after each tweet
+    io.emit('twit',{text:parameters.text,label:response.sentiment.document.label, score:response.sentiment.document.score});
+  }
   }
 });
   });
@@ -87,7 +97,6 @@ client.stream('statuses/filter', {track: '#mood', language:'en'}, function(strea
 
 function giveCount(req,res) {               //TODO redirect to main page
   res.json({ count: cCount+nCount+pCount});
-
 }
 
 router.get('/', giveCount);

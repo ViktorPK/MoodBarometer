@@ -24,13 +24,27 @@
   font-size: large;
 }
 
-.rowC{display:flex; flex-direction:row;padding-bottom: 5px;padding-top: 5px;background-color: #fcf5f4}
+.me{height:520px; color:#d17a22;overflow-y:auto;margin:10px}
+.tweets{
+  color:#000000 !important;
+  border: 2px solid #FF9800 !important;
+  padding:15px !important;
+  margin:15px !important;
+  background-color: #ffffff !important;
+}
+.nav{
+outline-color: #d17a22 !important;
+}
+.table{ overflow:auto;}
+.line{height: 530px;}
+.rowC{display:flex; flex-direction:row;padding-bottom: 5px;padding-top: 5px;}
 .paper{width:100%}
+.paperStats{width:40%}
 .rdiv{width:100%}
 .headings{ padding: 10px; text-align: center; font-size: large;}
 .table{font-size: large;}
 .between{padding-right: 15%}
-.first{padding-left:15%}
+.rowChips{display:flex; flex-direction:row;padding-bottom: 5px;padding-top: 5px;justify-content:space-around; }
 .analysis{padding:10px; padding-top: 0px}
 .divi{padding-top:30px}
 .tHeader{color:#d17a22 !important;

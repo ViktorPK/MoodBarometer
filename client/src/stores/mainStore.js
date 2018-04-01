@@ -28,9 +28,9 @@ class MainStore extends Reflux.Store {
       neutral:data.neutral,
       pSent:data.pSent.toFixed(10),
       nSent:data.nSent.toFixed(10),
-      pPercent:((data.positive/data.count)*100).toFixed(0),
-      nPercent:((data.negative/data.count)*100).toFixed(0),
-      cPercent:100-((data.positive/data.count)*100).toFixed(0)-((data.negative/data.count)*100).toFixed(0)
+      pPercent:Math.ceil(((data.positive/data.count)*100)),
+      nPercent:Math.floor(((data.negative/data.count)*100)),
+      cPercent:100-Math.ceil(((data.positive/data.count)*100))-Math.floor(((data.negative/data.count)*100))
     });
   }
 
