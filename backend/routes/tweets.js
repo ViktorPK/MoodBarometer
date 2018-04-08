@@ -46,7 +46,28 @@ var natural_language_understanding = new NaturalLanguageUnderstandingV1({
 
 var parameters = config.watson.parameters;
 
-client.stream('statuses/filter', {track: '#love', language:'en'}, function(stream) {  //stream english tweets featuring #mood
+function emitMain(){
+  if (pCount==0 && nCount==0) {
+    io.emit('tweet',{count: count, positive:pCount, pSent:0, negative:nCount, nSent: 0, neutral:cCount}); //thats ugly.
+  }
+  else if (nCount==0) {
+    io.emit('tweet',{count: count, positive:pCount, pSent:(pSent/pCount), negative:nCount, nSent: 0, neutral:cCount});
+  }
+  else if (pCount==0) {
+    io.emit('tweet',{count: count, positive:pCount, pSent: 0, negative:nCount, nSent:(nSent/nCount), neutral:cCount});
+  }
+  else {
+  io.emit('tweet',{count: count, positive:pCount, pSent:(pSent/pCount), negative:nCount, nSent:(nSent/nCount), neutral:cCount});
+}
+db.update(currentWeekNumber(),pCount, pSent, nCount, nSent, cCount, count, averageSentiment)  //update db after each tweet
+}
+
+function emitTweet(parameters,response){
+  io.emit('twit',{text:parameters.text,label:response.sentiment.document.label, score:response.sentiment.document.score});
+}
+
+
+client.stream('statuses/filter', {track: '#mood', language:'en'}, function(stream) {  //stream english tweets featuring #mood
   stream.on('data', function(event) {
     if (event.extended_tweet) parameters.text=event.extended_tweet.full_text;       //if tweet is shortened get full tweet
     else parameters.text = event.text;
@@ -55,11 +76,8 @@ client.stream('statuses/filter', {track: '#love', language:'en'}, function(strea
     console.log('Analyze API error:', err);
   else if (response.sentiment != null) {
     var sentScore=response.sentiment.document.score;
-    if(event.retweeted_status) {  //weighted scoring for Retweets - retweets are less valuable than original tweets
-      sentScore=sentScore/2;
-      overallSentiment+=sentScore;
-    }
-    else overallSentiment+=sentScore;                              //calculate statistics
+    if(event.retweeted_status) sentScore=sentScore/2;  //weighted scoring for Retweets - retweets are less valuable than original tweets
+    overallSentiment+=sentScore;                              //calculate statistics
     if (response.sentiment.document.label=='positive') {
       pCount++;
       pSent+=sentScore;
@@ -71,7 +89,6 @@ client.stream('statuses/filter', {track: '#love', language:'en'}, function(strea
     else {
       cCount++;
     }
-
     //print info to console
     count=nCount+pCount+cCount;
     averageSentiment=overallSentiment/count;
@@ -79,14 +96,8 @@ client.stream('statuses/filter', {track: '#love', language:'en'}, function(strea
     console.log('Overall: ' + overallSentiment + ' Count: ' + count + ' Average: ' + averageSentiment);
     console.log(parameters.text)
     console.log('---------------------------------------------\n')
-    if (pCount==0 && nCount==0) io.emit('tweet',{count: count, positive:pCount, pSent:0, negative:nCount, nSent: 0, neutral:cCount}); //thats ugly.
-    if (nCount==0) io.emit('tweet',{count: count, positive:pCount, pSent:(pSent/pCount), negative:nCount, nSent: 0, neutral:cCount});
-    else if (pCount==0) io.emit('tweet',{count: count, positive:pCount, pSent: 0, negative:nCount, nSent:(nSent/nCount), neutral:cCount});
-    else {
-    io.emit('tweet',{count: count, positive:pCount, pSent:(pSent/pCount), negative:nCount, nSent:(nSent/nCount), neutral:cCount}); 
-    db.update(currentWeekNumber(),pCount, pSent, nCount, nSent, cCount, count, averageSentiment)  //update db after each tweet
-    io.emit('twit',{text:parameters.text,label:response.sentiment.document.label, score:response.sentiment.document.score});
-  }
+    emitMain();
+    emitTweet(parameters,response);
   }
 });
   });
@@ -96,6 +107,7 @@ client.stream('statuses/filter', {track: '#love', language:'en'}, function(strea
 });
 
 function giveCount(req,res) {               //TODO redirect to main page
+  emitMain();
   res.json({ count: cCount+nCount+pCount});
 }
 

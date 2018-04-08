@@ -6,12 +6,19 @@ class StatsStore extends Reflux.Store {
   constructor() {
     super();
     this.state = {
+      open: false,
       weeks: [],
       current:[]
     };
     this.listenables = actions;
   }
+  handleOpen(){
+   this.setState({open: true});
+ };
 
+ handleClose(){
+   this.setState({open: false});
+ };
   getStats() {
     axios.get('http://localhost:3001/statistics/')
     .then((res) => {

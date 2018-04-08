@@ -5,7 +5,7 @@ const config = require('../config');
 var currentWeekNumber = require('current-week-number');
 var db = require('../db');
 
-
+db.populate();
 var weeks=db.getAll();
 
 function giveStats(req,res) {
@@ -15,11 +15,11 @@ function giveStats(req,res) {
   }
   var last=weeks[1];
   var first=weeks[weeks.length-1];
-  var fd=first[1]
-  var ld=last[1];
+  var fd=first[0]
+  var ld=last[0];
   var domain=[fd,ld];
   res.json({
-    weeks: weeks,
+    weeks: weeks.slice(1,weeks.length),
     last: domain
   });
 }

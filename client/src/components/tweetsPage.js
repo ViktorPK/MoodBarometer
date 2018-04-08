@@ -13,6 +13,8 @@ import Divider from 'material-ui/Divider'
 import {BottomNavigation, BottomNavigationItem} from 'material-ui/BottomNavigation';
 import Paper from 'material-ui/Paper';
 import FontIcon from 'material-ui/FontIcon';
+import FlatButton from 'material-ui/FlatButton'
+import Dialog from 'material-ui/Dialog'
 import Chip from 'material-ui/Chip'
 import {List, ListItem} from 'material-ui/List';
 import { Link } from 'react-router';
@@ -37,24 +39,37 @@ class TweetsPage extends Reflux.Component {
 
   render() {
 
+    const ekshans = <FlatButton
+            label="OK"
+            primary={true}
+            keyboardFocused={true}
+             onClick={() => actions.handleClose()}
+          />
     return (
       <div className='divdiv'>
-      <MuiThemeProvider muiTheme={getMuiTheme(darkBaseTheme)}
-      >
+      <MuiThemeProvider muiTheme={getMuiTheme(darkBaseTheme)}>
       <AppBar className="App"
       title="Mood Barometer"
       titleStyle={{color: "#fffffff"}}
       iconElementRight={
-        <IconButton tooltip="Information">
+        <IconButton tooltip="Information" onClick={() => actions.handleOpen()}>
        <FontIcon className="material-icons" color='#ffffff'>info_outline</FontIcon>
        </IconButton>
       }
       showMenuIconButton={false}
       />
 
+      <Dialog
+       actions={ekshans}
+       title="Information"
+       modal={false}
+       open={this.state.open}
+       onRequestClose={() => actions.handleClose()}
+     >
+       INFORMATION
+     </Dialog>
 
       <Paper className="me">
-
                  {this.state.tweets.map((tweets) => <Paper zDepth={3} className="tweets"> {tweets.label} tweet  with sentiment score of {tweets.score}  <Divider  style={{
           margin:'5px',
           backgroundColor: '#ffd699',

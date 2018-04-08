@@ -13,6 +13,8 @@ import Divider from 'material-ui/Divider'
 import {BottomNavigation, BottomNavigationItem} from 'material-ui/BottomNavigation';
 import Paper from 'material-ui/Paper';
 import FontIcon from 'material-ui/FontIcon';
+import FlatButton from 'material-ui/FlatButton'
+import Dialog from 'material-ui/Dialog'
 import Chip from 'material-ui/Chip'
 import {blue300} from 'material-ui/styles/colors';
 import {VictoryLine, VictoryChart, VictoryAxis, VictoryLabel,VictoryBar,VictoryTooltip,VictoryTheme} from 'victory';
@@ -39,7 +41,12 @@ class StatsPage extends Reflux.Component {
     actions.getStats();
   }
   render() {
-
+    const ekshans = <FlatButton
+            label="OK"
+            primary={true}
+            keyboardFocused={true}
+             onClick={() => actions.handleClose()}
+          />
     return (
       <div className='divdiv'>
       <MuiThemeProvider muiTheme={getMuiTheme(darkBaseTheme)}>
@@ -47,12 +54,22 @@ class StatsPage extends Reflux.Component {
       title="Mood Barometer"
       titleStyle={{color: "#fffffff"}}
       iconElementRight={
-        <IconButton tooltip="Information">
+        <IconButton tooltip="Information" onClick={() => actions.handleOpen()}>
        <FontIcon className="material-icons" color='#ffffff'>info_outline</FontIcon>
        </IconButton>
       }
       showMenuIconButton={false}
       />
+
+      <Dialog
+       actions={ekshans}
+       title="Information"
+       modal={false}
+       open={this.state.open}
+       onRequestClose={() => actions.handleClose()}
+     >
+       INFORMATION
+     </Dialog>
       <div className='rowC'>
       <div className='rdiv'>
       <div className="line">

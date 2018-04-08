@@ -10,9 +10,11 @@ import socketIOClient from "socket.io-client";
 import AppBar from 'material-ui/AppBar';
 import IconButton from 'material-ui/IconButton'
 import Divider from 'material-ui/Divider'
+import Dialog from 'material-ui/Dialog'
 import {BottomNavigation, BottomNavigationItem} from 'material-ui/BottomNavigation';
 import Paper from 'material-ui/Paper';
 import FontIcon from 'material-ui/FontIcon';
+import FlatButton from 'material-ui/FlatButton'
 import Chip from 'material-ui/Chip'
 import {VictoryPie} from 'victory';
 import { Redirect } from 'react-router-dom';
@@ -36,25 +38,44 @@ class MainPage extends Reflux.Component {
     this.state = { };
     this.stores = [MainStore];
   }
+
   componentDidMount(){
+    actions.onStart();
     socket.on('tweet', function (data) {
     actions.gotTweet(data);
 });
   }
   render() {
-
+    const ekshans = <FlatButton
+            label="OK"
+            keyboardFocused={true}
+             onClick={() => actions.handleClose()}
+          />
     return (
+      <div className='divdiv'>
       <MuiThemeProvider muiTheme={getMuiTheme(darkBaseTheme)}>
       <AppBar className="App"
       title="Mood Barometer"
       titleStyle={{color: "#fffffff"}}
       iconElementRight={
-        <IconButton tooltip="Information">
+        <IconButton tooltip="Information" onClick={() => actions.handleOpen()}>
        <FontIcon className="material-icons" color='#ffffff'>info_outline</FontIcon>
        </IconButton>
       }
       showMenuIconButton={false}
       />
+
+      <Dialog
+       actions={ekshans}
+       title="Information"
+       modal={false}
+       open={this.state.open}
+       onRequestClose={() => actions.handleClose()}
+     >
+       INFORMATION
+     </Dialog>
+
+
       <div className='rowC'>
       <div className='rdiv'>
       <div>
@@ -156,6 +177,7 @@ Lorem ipsum dolor sit amet, volumus molestie tincidunt at his. Ea possit tamquam
   />
 </BottomNavigation>
       </MuiThemeProvider>
+      </div>
     );
   }
 }

@@ -59,3 +59,20 @@ exports.getAll = function(){
 
 return ret;
 }
+
+exports.populate = function()
+{
+ MongoClient.connect(url, function(err, db) {
+    if(err) throw err;
+    const moodBarDB = db.db('moodBar')
+    var collection =  moodBarDB.collection('weeks')
+    for (i=0;i<52;i++){
+      var rand=Math.random(-1,1);
+      if (i%3==0) rand=rand*(-1);
+      collection.update({week: i},{week: i, positive:i*10, pSentiment:rand, negative: i*10, nSentiment: rand, neutral: i*10, count: i*10, averageSentiment: rand},{upsert: true}, function(err,docs) {
+        if (err) console.log(err);
+    });
+    }
+  db.close();
+  });
+};

@@ -1,12 +1,14 @@
 import Reflux from 'reflux';
 import request from 'superagent';
 import actions from '../actions/actions';
+import axios from 'axios';
 const prefix = require('superagent-prefix')('http://localhost:3001')
 
 class MainStore extends Reflux.Store {
   constructor() {
     super();
     this.state = {
+      open: false,
       count: 0,
       positive:0,
       negative:0,
@@ -20,8 +22,20 @@ class MainStore extends Reflux.Store {
     this.listenables = actions;
   }
 
+  handleOpen(){
+   this.setState({open: true});
+ };
+
+ handleClose(){
+   this.setState({open: false});
+ };
+
+
+  onStart(){
+        axios.get('http://localhost:3001/')
+  }
   gotTweet(data){
-    this.setState({
+    if (data.count!=0) this.setState({
       count:data.count,
       positive:data.positive,
       negative:data.negative,

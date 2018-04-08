@@ -5,6 +5,9 @@ const actions = Reflux.createActions({
   gotTweet: {asyncResult: true},
   getStats: {asyncResult: true},
   doStuff: {asyncResult: true},
+  onStart: {asyncResult: true},
+  handleOpen:{asyncResult: true},
+  handleClose:{asyncResult:true},
 });
 
 export default actions;
